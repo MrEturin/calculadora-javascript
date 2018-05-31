@@ -98,7 +98,9 @@ class CalcController{
 
     _pushOperation(value){
         this._operation.push(value);
-
+        if(this._operation.length > 3){
+            this._calc();
+        }
     }
 
     _addOperation(value){
@@ -106,20 +108,23 @@ class CalcController{
         if(isNaN(this._getLastOperation())){
 
             if(this._isOperator(value)){
+
                 this._setLastOperation(value);
+
             }else if(isNaN(value)){
 
                 console.log("Porcentagem e .");
 
             }else{
-
-                this._operation.push(value);
+                
+                this._pushOperation(value);
+                
             }
 
         }else{
 
             if(this._isOperator(value)){
-                this._operation.push(value);
+                this._pushOperation(value);
             }else{
                 console.log(this._operation.length);
                 this._setLastOperation(parseInt(this._getLastOperation(value).toString() + value.toString()));
@@ -128,6 +133,17 @@ class CalcController{
         }
         console.log(this._operation);
     }
+
+    _calc(){
+
+        let last = this._operation.pop();
+
+        let result = eval(this._operation.join(""));
+
+        this._operation = [result, last];
+    }
+
+
 
     _initButtonEvents(){
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
