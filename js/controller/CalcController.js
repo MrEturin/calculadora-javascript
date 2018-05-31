@@ -11,17 +11,16 @@ class CalcController{
     }
 
     initialize(){
-        // assim podemos pegar o id gerado para a função interval caso seja necessário para-lá
-        //let interval = setInterval(()=>{
-        setInterval(()=>{
-            this._setDisplayDateTime()
-        }, 1000);
-
         /*
+        assim podemos pegar o id gerado para a função interval caso seja necessário para-lá
+        let interval = setInterval(()=>{
         setTimeout(() =>{
             clearInterval(interval);
         }, 10000);
         */
+        setInterval(()=>{
+            this._setDisplayDateTime()
+        }, 1000);
 
     }
 
@@ -49,7 +48,7 @@ class CalcController{
                 this._addOperation("%");
                 break;
             case "igual":
-                
+                this._calc();
                 break;
             case "ponto":
                 this._addOperation(".");
@@ -71,17 +70,19 @@ class CalcController{
                 break;
         }
     }
-    
-    _clearAll(){
-        console.log("Limpa tudo");
-    }
 
     _setError(){
         this.displayCalc = "Error";
     }
 
+    _clearAll(){
+        this._operation = [];
+        this._setLastNumberToDisplay();
+    }
+
     _clearEntry(){
         this._operation.pop();
+        this._setLastNumberToDisplay();
     }
 
     _getLastOperation(){
@@ -93,7 +94,7 @@ class CalcController{
     }
 
     _isOperator(value){
-        return (['+', '-', '*', '/'].includes(value));
+        return (['+', '-', '*', '/', '%'].includes(value));
     }
 
     _pushOperation(value){
@@ -116,43 +117,55 @@ class CalcController{
                 console.log("Porcentagem e .");
 
             }else{
-                
                 this._pushOperation(value);
                 this._setLastNumberToDisplay();
             }
-
         }else{
-
             if(this._isOperator(value)){
                 this._pushOperation(value);
             }else{
-                console.log(this._operation.length);
-                this._setLastOperation(parseInt(this._getLastOperation(value).toString() + value.toString()));
+                let newValue = this._getLastOperation().toString() + value.toString();
+                this._setLastOperation(parseInt(newValue));
                 this._setLastNumberToDisplay();
             }
 
         }
-        console.log(this._operation);
     }
     
     _setLastNumberToDisplay(){
-        let lastNumber;
-        for(let i = this._isOperator.length-1; i>=0; i--){
+        let lastNumber = '';
+        for(let i = this._isOperator.length; i>=0; i--){
+
+            //Aqui ta o problema
             if(!this._isOperator(this._operation[i])){
                 lastNumber = this._operation[i];
                 break;
             }
         }
+        console.log(this._operation, lastNumber);
+        if(!lastNumber) lastNumber = 0;
         this.displayCalc = lastNumber;
     }
 
     _calc(){
 
-        let last = this._operation.pop();
+        let last = '';
+
+        if(this._operation.length > 3) last = this._operation.pop();
 
         let result = eval(this._operation.join(""));
 
-        this._operation = [result, last];
+        if(last == '%'){
+
+            this._operation = [(result / 100)];
+
+        }else{
+            
+            this._operation = [result];
+
+            if(last) this._operation.push(last);
+        
+        }
 
         this._setLastNumberToDisplay();
     }
