@@ -117,8 +117,10 @@ class CalcController{
                 console.log("Porcentagem e .");
 
             }else{
+
                 this._pushOperation(value);
                 this._setLastNumberToDisplay();
+
             }
         }else{
             if(this._isOperator(value)){
@@ -134,15 +136,15 @@ class CalcController{
     
     _setLastNumberToDisplay(){
         let lastNumber = '';
-        for(let i = this._isOperator.length; i>=0; i--){
-
-            //Aqui ta o problema
+        for(let i = this._operation.length-1; i>=0; i--){
             if(!this._isOperator(this._operation[i])){
                 lastNumber = this._operation[i];
                 break;
             }
+
         }
-        console.log(this._operation, lastNumber);
+
+        console.log(lastNumber);
         if(!lastNumber) lastNumber = 0;
         this.displayCalc = lastNumber;
     }
