@@ -118,7 +118,7 @@ class CalcController{
             }else{
                 
                 this._pushOperation(value);
-                
+                this._setLastNumberToDisplay();
             }
 
         }else{
@@ -128,10 +128,22 @@ class CalcController{
             }else{
                 console.log(this._operation.length);
                 this._setLastOperation(parseInt(this._getLastOperation(value).toString() + value.toString()));
+                this._setLastNumberToDisplay();
             }
 
         }
         console.log(this._operation);
+    }
+    
+    _setLastNumberToDisplay(){
+        let lastNumber;
+        for(let i = this._isOperator.length-1; i>=0; i--){
+            if(!this._isOperator(this._operation[i])){
+                lastNumber = this._operation[i];
+                break;
+            }
+        }
+        this.displayCalc = lastNumber;
     }
 
     _calc(){
@@ -141,9 +153,9 @@ class CalcController{
         let result = eval(this._operation.join(""));
 
         this._operation = [result, last];
+
+        this._setLastNumberToDisplay();
     }
-
-
 
     _initButtonEvents(){
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
