@@ -1,6 +1,8 @@
 class CalcController{
 
     constructor(){
+        this._lastOperator = '';
+        this._lastNumber = '';
         this._locale        = "pt-BR";
         this._displayCalcEl = document.querySelector("#display");
         this._timeEl        = document.querySelector("#hora");
@@ -8,9 +10,11 @@ class CalcController{
         this._setDisplayDateTime();
         this._initButtonEvents();
         this._operation = [];
+        this._initialize();
+        this._initKeyboard();
     }
 
-    initialize(){
+    _initialize(){
         /*
         assim podemos pegar o id gerado para a função interval caso seja necessário para-lá
         let interval = setInterval(()=>{
@@ -24,34 +28,57 @@ class CalcController{
 
     }
 
+    _initKeyboard(){
+        document.addEventListener('keyup', e=>{
+            console.log(e.key);
+            this._execBtn(e.key);
+        });
+    }
+
+    _copyToClipBord(){
+        let input = document.createElement("input");
+        input.value = this._displayCalc();
+    }
+
     _execBtn(value){
         switch(value){
+            case "Escape":
             case "ac":
                 this._clearAll();
                 break;
+            case "Backspace":
             case "ce":
                 this._clearEntry();
                 break;
+                case "+":
             case "soma":
                 this._addOperation("+");
                 break;
+            case "-":
             case "subtracao":
                 this._addOperation("-");
                 break;
+                case "/":
             case "divisao":
                 this._addOperation("/");
                 break;
+                case "*":
             case "multiplicacao":
                 this._addOperation("*");
                 break;
+            case "%":
             case "porcento":
                 this._addOperation("%");
                 break;
+            case "Enter":
+            case "=":
             case "igual":
                 this._calc();
                 break;
+            case ".":
+            case ",":
             case "ponto":
-                this._addOperation(".");
+                this._addDot();
                 break;
             case "0":
             case "1":
@@ -66,23 +93,41 @@ class CalcController{
                 this._addOperation(parseInt(value));
                 break;
             default:
-                this._setError();
+                return;
                 break;
         }
     }
 
     _setError(){
-        this.displayCalc = "Error";
+        this._displayCalc = "Error";
     }
 
     _clearAll(){
-        this._operation = [];
+        this._operation     = [];
+        this._lastNumber    = '';
+        this._lastOperator  = '';
         this._setLastNumberToDisplay();
     }
 
     _clearEntry(){
         this._operation.pop();
         this._setLastNumberToDisplay();
+    }
+
+    _addDot(){
+
+        let lastOperation = this._getLastOperation();
+        
+        if(typeof lastOperation === 'string' && lastOperation.split("").indexOf(".") > -1) return;
+
+        if(this._isOperator(lastOperation) || !lastOperation){
+            this._pushOperation("0.");
+        }else{
+            this._setLastOperation(lastOperation.toString() + ".");
+        }
+
+        this._setLastNumberToDisplay();
+
     }
 
     _getLastOperation(){
@@ -127,43 +172,88 @@ class CalcController{
                 this._pushOperation(value);
             }else{
                 let newValue = this._getLastOperation().toString() + value.toString();
-                this._setLastOperation(parseInt(newValue));
+                this._setLastOperation(newValue);
                 this._setLastNumberToDisplay();
             }
 
         }
     }
-    
-    _setLastNumberToDisplay(){
-        let lastNumber = '';
+
+    _getLastItem(isOperator = true){
+
+        let lastItem = '';
         for(let i = this._operation.length-1; i>=0; i--){
-            if(!this._isOperator(this._operation[i])){
-                lastNumber = this._operation[i];
+            if(this._isOperator(this._operation[i]) == isOperator){
+                lastItem = this._operation[i];
                 break;
             }
+        }
+
+        if(!lastItem){
+
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
 
         }
 
-        console.log(lastNumber);
+        return lastItem;
+
+    }
+    
+    _setLastNumberToDisplay(){
+
+        let lastNumber = this._getLastItem(false);
+
         if(!lastNumber) lastNumber = 0;
-        this.displayCalc = lastNumber;
+
+        this._displayCalc = lastNumber;
+
+    }
+
+    _getResult(){
+        return eval(this._operation.join(""));
     }
 
     _calc(){
 
         let last = '';
+        this._lastOperator  = this._getLastItem();
 
-        if(this._operation.length > 3) last = this._operation.pop();
+        if(this._operation.length < 3){
 
-        let result = eval(this._operation.join(""));
+            let firstItem   = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber];
+
+        }
+
+        if(this._operation.length > 3){
+
+            last                = this._operation.pop();
+            this._lastNumber    = this._getLastItem(false);
+
+        }else if(this._operation.length == 3){
+
+            this._lastNumber    = this._getLastItem(false);
+
+        }
 
         if(last == '%'){
 
-            this._operation = [(result / 100)];
+            this._operation[2] = this._operation[0] / 100 * this._operation[2];
+            
+
+            console.log(this._operation);
+            /*
+            1 + 1%
+            1 - 1%
+            1 * 1%
+            1 / 1%
+            */
+
+            this._operation = [this._getResult()];
 
         }else{
-            
-            this._operation = [result];
+
+            this._operation = [this._getResult()];
 
             if(last) this._operation.push(last);
         
@@ -196,43 +286,43 @@ class CalcController{
     }
 
     _setDisplayDateTime(){
-        this.displayDate = this.currentDate.toLocaleDateString(this._locale, {
+        this._displayDate = this._currentDate.toLocaleDateString(this._locale, {
             day: "2-digit",
             month: "long",
             year: "numeric"
         });
-        this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
+        this._displayTime = this._currentDate.toLocaleTimeString(this._locale);
     }
 
-    get displayDate(){
+    get _displayDate(){
         return this._dateEl.innerHTML;
     }
 
-    set displayDate(date){
+    set _displayDate(date){
         this._dateEl.innerHTML = date;
     }
 
-    get displayTime(){
+    get _displayTime(){
         return this._timeEl.innerHTML;
     }
 
-    set displayTime(time){
+    set _displayTime(time){
         this._timeEl.innerHTML = time;
     }
 
-    get displayCalc(){
+    get _displayCalc(){
         return this._displayCalcEl.innerHTML;
     }
 
-    set displayCalc(displayCalc){
+    set _displayCalc(displayCalc){
         this._displayCalcEl.innerHTML = displayCalc;
     }
 
-    get currentDate(){
+    get _currentDate(){
         return new Date();
     }
 
-    set currentDate(currentDate){
+    set _currentDate(currentDate){
         this._currentDate = currentDate;
     }
 
