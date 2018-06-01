@@ -1,6 +1,7 @@
 class CalcController{
 
     constructor(){
+        this._audio = new Audio('click.mp3');
         this._lastOperator = '';
         this._lastNumber = '';
         this._locale        = "pt-BR";
@@ -8,6 +9,7 @@ class CalcController{
         this._timeEl        = document.querySelector("#hora");
         this._dateEl        = document.querySelector("#data");
         this._operation = [];
+        this._audioStatus= false;
     }
 
     initialize(){
@@ -27,6 +29,30 @@ class CalcController{
 
         this._initKeyboard();
         this._pasteFromClipBoard();
+
+        this._addSoundToCLick();
+
+    }
+
+    _touggleAudio(){
+        console.log("Entrei aqui");
+        this._audioStatus = !this._audioStatus;
+    }
+
+    _addSoundToCLick(){
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+            btn.addEventListener('dblclick', e => {
+                this._touggleAudio();
+            }
+        )}, false);
+    }
+
+    _playAudio(){
+
+        if(this._audioStatus){
+            this._audio.currentTime = '0';
+            this._audio.play();
+        }
 
     }
 
@@ -64,6 +90,7 @@ class CalcController{
     }
 
     _execBtn(value){
+        let validBtn = true;
         switch(value){
             case "Escape":
             case "ac":
@@ -116,9 +143,10 @@ class CalcController{
                 this._addOperation(parseInt(value));
                 break;
             default:
-                return;
+                validBtn = false;
                 break;
         }
+        if(validBtn) this._playAudio();
     }
 
     _setError(){
