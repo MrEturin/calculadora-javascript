@@ -150,7 +150,10 @@ class CalcController{
     }
 
     _setError(){
+
         this.displayCalc = "Error";
+        setTimeout(()=> this._clearAll(), 1000 );
+
     }
 
     _clearAll(){
@@ -261,7 +264,13 @@ class CalcController{
 
     }
 
+    _convertResults(){
+        this._operation[0] = parseFloat(this._operation[0]);
+        if(this._operation[2] != 'undefined')
+            this._operation[2] = parseFloat(this._operation[2]);
+    }
     _getResult(){
+        this._convertResults();
         return eval(this._operation.join(""));
     }
 
@@ -367,7 +376,11 @@ class CalcController{
     }
 
     set displayCalc(displayCalc){
-        this._displayCalcEl.innerHTML = displayCalc;
+        if(displayCalc.toString().length > 10){
+            this._setError();
+        }else{
+            this._displayCalcEl.innerHTML = displayCalc;
+        }
     }
 
     get currentDate(){
