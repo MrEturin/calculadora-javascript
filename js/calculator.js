@@ -1,5 +1,5 @@
 window.calculator = new CalcController;
-
+calculator.initialize();
 /*
 let dt = new Date();
 

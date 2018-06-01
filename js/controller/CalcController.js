@@ -7,14 +7,10 @@ class CalcController{
         this._displayCalcEl = document.querySelector("#display");
         this._timeEl        = document.querySelector("#hora");
         this._dateEl        = document.querySelector("#data");
-        this._setDisplayDateTime();
-        this._initButtonEvents();
         this._operation = [];
-        this._initialize();
-        this._initKeyboard();
     }
 
-    _initialize(){
+    initialize(){
         /*
         assim podemos pegar o id gerado para a função interval caso seja necessário para-lá
         let interval = setInterval(()=>{
@@ -26,18 +22,45 @@ class CalcController{
             this._setDisplayDateTime()
         }, 1000);
 
+        this._setDisplayDateTime();
+        this._initButtonEvents();
+
+        this._initKeyboard();
+        this._pasteFromClipBoard();
+
     }
+
+    _pasteFromClipBoard(){
+
+        document.addEventListener('paste', e => {
+
+            let text = e.clipboardData.getData("Text");
+            this._operation = [parseFloat(text)];
+            this._setLastNumberToDisplay();
+
+
+        }
+
+    )};
 
     _initKeyboard(){
         document.addEventListener('keyup', e=>{
-            console.log(e.key);
-            this._execBtn(e.key);
+            if(e.key == 'c' && e.ctrlKey){
+                 this._copyToClipBord();
+            }else{
+                this._execBtn(e.key);
+            }
         });
     }
 
     _copyToClipBord(){
+
         let input = document.createElement("input");
-        input.value = this._displayCalc();
+        input.value = this.displayCalc;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        input.remove();
     }
 
     _execBtn(value){
@@ -99,7 +122,7 @@ class CalcController{
     }
 
     _setError(){
-        this._displayCalc = "Error";
+        this.displayCalc = "Error";
     }
 
     _clearAll(){
@@ -157,10 +180,6 @@ class CalcController{
 
                 this._setLastOperation(value);
 
-            }else if(isNaN(value)){
-
-                console.log("Porcentagem e .");
-
             }else{
 
                 this._pushOperation(value);
@@ -169,7 +188,12 @@ class CalcController{
             }
         }else{
             if(this._isOperator(value)){
-                this._pushOperation(value);
+                if(value == '%' && this._operation.length < 2){
+                    this._operation = ['0.'+this._operation[0]];
+                    this._setLastNumberToDisplay();
+                }else{
+                    this._pushOperation(value);
+                }
             }else{
                 let newValue = this._getLastOperation().toString() + value.toString();
                 this._setLastOperation(newValue);
@@ -205,7 +229,7 @@ class CalcController{
 
         if(!lastNumber) lastNumber = 0;
 
-        this._displayCalc = lastNumber;
+        this.displayCalc = lastNumber;
 
     }
 
@@ -286,43 +310,43 @@ class CalcController{
     }
 
     _setDisplayDateTime(){
-        this._displayDate = this._currentDate.toLocaleDateString(this._locale, {
+        this.displayDate = this.currentDate.toLocaleDateString(this._locale, {
             day: "2-digit",
             month: "long",
             year: "numeric"
         });
-        this._displayTime = this._currentDate.toLocaleTimeString(this._locale);
+        this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
     }
 
-    get _displayDate(){
+    get displayDate(){
         return this._dateEl.innerHTML;
     }
 
-    set _displayDate(date){
+    set displayDate(date){
         this._dateEl.innerHTML = date;
     }
 
-    get _displayTime(){
+    get displayTime(){
         return this._timeEl.innerHTML;
     }
 
-    set _displayTime(time){
+    set displayTime(time){
         this._timeEl.innerHTML = time;
     }
 
-    get _displayCalc(){
+    get displayCalc(){
         return this._displayCalcEl.innerHTML;
     }
 
-    set _displayCalc(displayCalc){
+    set displayCalc(displayCalc){
         this._displayCalcEl.innerHTML = displayCalc;
     }
 
-    get _currentDate(){
+    get currentDate(){
         return new Date();
     }
 
-    set _currentDate(currentDate){
+    set currentDate(currentDate){
         this._currentDate = currentDate;
     }
 
